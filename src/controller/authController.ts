@@ -8,7 +8,6 @@ import prisma from "../config/db.config.js"; // make sure this points to your pr
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export const signup = async (req: Request, res: Response) => {
-    console.log("signup hit")
     const { name, email, password, phone, address, role } = req.body;
 
     try {
@@ -77,41 +76,46 @@ export const login = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
-const FRONTEND_URL = process.env.FRONTEND_URL!; // e.g. http://localhost:5173
-const EMAIL_USER = process.env.EMAIL_USER!;
-const EMAIL_PASS = process.env.EMAIL_PASS!;
+// const APP_URL = process.env.APP_URL || ;
+// export const requestMagicLink = async (req: Request, res: Response) => {
+//     const { email, role } = req.body;
 
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS,
-    },
-});
+//     if (!["admin", "customer"].includes(role)) {
+//         return res.status(400).json({ message: "Invalid role" });
+//     }
 
-export const sendMagicLink = async (req: Request, res: Response) => {
-    const { email } = req.body;
+//     const user = await prisma[role].findUnique({ where: { email } });
 
-    const user = await prisma.customer.findUnique({ where: { email } }) ||
-        await prisma.admin.findUnique({ where: { email } });
+//     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+//     const token = jwt.sign({ id: user.id, role }, JWT_SECRET, { expiresIn: "15m" });
+//     const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-    const token = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 mins
+//     await prisma[role].update({
+//         where: { email },
+//         data: {
+//             magicToken: token,
+//             magicTokenExpiry: expiry,
+//         },
+//     });
 
-    await prisma.passwordResetToken.create({
-        data: { email, token, expiresAt }
-    });
+//     const link = `${APP_URL}/auth/magic-link/verify?token=${token}`;
 
-    const resetUrl = `${FRONTEND_URL}/reset-password?token=${token}&email=${email}`;
+//     // Send the email
+//     const transporter = nodemailer.createTransport({
+//         service: "gmail",
+//         auth: {
+//             user: process.env.EMAIL_USER,
+//             pass: process.env.EMAIL_PASS,
+//         },
+//     });
 
-    await transporter.sendMail({
-        from: `"Support" <${EMAIL_USER}>`,
-        to: email,
-        subject: "Your Magic Login Link",
-        html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in 15 minutes.</p>`
-    });
+//     await transporter.sendMail({
+//         from: process.env.EMAIL_USER,
+//         to: email,
+//         subject: "Your Magic Login Link",
+//         html: `<p>Click the link to log in: <a href="${link}">${link}</a> (expires in 15 minutes)</p>`,
+//     });
 
-    return res.json({ message: "Magic link sent to email" });
-};
+//     return res.json({ message: "Magic link sent!" });
+// };

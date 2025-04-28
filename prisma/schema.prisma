@@ -21,8 +21,7 @@ model Admin {
   password         String
   phone            String    @unique
   address          String
-  magicToken       String? // can be null
-  magicTokenExpiry DateTime?
+
 
   createdAt DateTime @default(now())
 
@@ -35,8 +34,7 @@ model Customer {
   email            String    @unique
   phone            String
   address          String
-  magicToken       String? // can be null
-  magicTokenExpiry DateTime?
+
 
   password  String // 👈 Add this line
   createdAt DateTime @default(now())

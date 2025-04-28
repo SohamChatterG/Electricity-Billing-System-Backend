@@ -4,7 +4,7 @@ import { generateMeterNumber } from "../utils/meterUtils.js";
 
 export const createConnection = async (req: Request, res: Response) => {
     const { customerId, connectionType } = req.body;
-
+    console.log("req body", req.body)
     // Validation
     if (!customerId || !connectionType) {
         return res.status(400).json({
@@ -21,19 +21,19 @@ export const createConnection = async (req: Request, res: Response) => {
             return res.status(404).json({ message: "Customer not found" });
         }
 
-        const existingConnection = await prisma.connection.findFirst({
-            where: { customerId }
-        });
+        // const existingConnection = await prisma.connection.findFirst({
+        //     where: { customerId }
+        // });
 
-        if (existingConnection) {
-            return res.status(400).json({
-                message: "Customer already has an active connection",
-                existingConnection: {
-                    id: existingConnection.id,
-                    meterNumber: existingConnection.meterNumber
-                }
-            });
-        }
+        // if (existingConnection) {
+        //     return res.status(400).json({
+        //         message: "Customer already has an active connection",
+        //         existingConnection: {
+        //             id: existingConnection.id,
+        //             meterNumber: existingConnection.meterNumber
+        //         }
+        //     });
+        // }
 
         const newConnection = await prisma.connection.create({
             data: {
@@ -149,7 +149,6 @@ export const getCustomerConnections = async (req: Request, res: Response) => {
 };
 
 export const updateConnection = async (req: Request, res: Response) => {
-    console.log("update hit")
     const { connectionId } = req.params;
     const { type, status } = req.body;
 

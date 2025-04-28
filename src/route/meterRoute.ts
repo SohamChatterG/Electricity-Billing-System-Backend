@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 const router: Router = Router();
-import { getMeterReadings, submitMeterReading } from "../controller/adminController.js";
+import { getMeterReadings, submitMeterReading } from "../controller/meterController.js";
 import { authenticate, isAdmin } from "../middleware/authMiddleware.js";
 
 // Submit new meter reading (Admin only) - Creates reading and generates bill

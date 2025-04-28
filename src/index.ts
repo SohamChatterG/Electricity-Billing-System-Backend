@@ -24,7 +24,7 @@ app.use("/api/meter", meterRoutes)
 app.use("/api/notification", notificationRoutes)
 app.use("/api/customers", customerRoutes)
 app.use("/api/bills", billRoutes);
-app.use("/api/payment", paymentRoutes);
+app.use("/api/payment", paymentRoutes)
 app.get("/", (req: Request, res: Response) => {
   return res.send("It's working 🙌");
 });
