@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String   @unique
+  address   String
+  createdAt DateTime @default(now())
+
+  // Admin-specific fields can be added here as needed
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String
+  address   String
+  password  String // 👈 Add this line
+  createdAt DateTime @default(now())
+
+  connections   Connection[]
+  bills         Bill[]
+  payments      Payment[]
+  notifications Notification[]
+}
+
+model Connection {
+  id          String    @id @default(uuid())
+  meterNumber String    @unique
+  type        String // e.g. "residential", "commercial"
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  customerId  String
+  readings    Reading[]
+  createdAt   DateTime  @default(now())
+}
+
+model Reading {
+  id            String     @id @default(uuid())
+  connection    Connection @relation(fields: [connectionId], references: [id])
+  connectionId  String
+  month         String // e.g. "2024-08"
+  previousUnit  Int
+  currentUnit   Int
+  unitsConsumed Int
+  bill          Bill?
+  createdAt     DateTime   @default(now())
+}
+
+model Bill {
+  id         String   @id @default(uuid())
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String
+  reading    Reading  @relation(fields: [readingId], references: [id])
+  readingId  String   @unique
+  amount     Float
+  dueDate    DateTime
+  isPaid     Boolean  @default(false)
+  payment    Payment?
+  createdAt  DateTime @default(now())
+}
+
+model Payment {
+  id         String   @id @default(uuid())
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String
+  bill       Bill     @relation(fields: [billId], references: [id])
+  billId     String   @unique
+  amount     Float
+  method     String // "cash", "upi", "card"
+  paidAt     DateTime @default(now())
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  customerId String
+  title      String
+  message    String
+  sentAt     DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+}
